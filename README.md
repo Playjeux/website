@@ -1,8 +1,9 @@
 # Playjeux Studios — Under Maintenance
 
 A barebones, fully-static single-page "under maintenance" site built with
-**SvelteKit + `@sveltejs/adapter-static`**, deployed as **static pages on
-Cloudflare Pages**. JS source with JSDoc typings (see `jsconfig.json`).
+**SvelteKit 3 + `@sveltejs/adapter-static`** (Svelte 5, Vite 8), deployed as
+**static pages on Cloudflare Pages**. JS source with JSDoc typings (see
+`jsconfig.json`). Build requires **Node ≥ 22.17** (SvelteKit 3 engines).
 
 ## Scripts
 
@@ -31,7 +32,7 @@ so it's served from Cloudflare's static CDN.
    - **Framework preset:** `Svelte`
    - **Build command:** `npm run build`
    - **Build output directory:** `build`
-   - **Node.js version:** 22
+   - **Node.js version:** 22 **or newer** (SvelteKit 3 needs ≥ 22.17)
 4. Save & deploy. Cloudflare runs the build and serves `build/` statically.
 
 ### Option B — wrangler CLI
@@ -43,3 +44,18 @@ npx wrangler pages deploy build --project-name=playjeux-website
 
 Note: since this ships a real prerendered `index.html`, no SPA fallback is
 required — unknown paths correctly return 404 (fine for a maintenance page).
+
+## Dependencies & audit
+
+- Stack: SvelteKit `3.x`, Svelte `5.x`, Vite `8.x`, `adapter-static` `4.x`,
+  TypeScript `6.x` (engine for the JSDoc/svelte-check checks).
+- `npm audit` is limited to one **low** advisory: `deepmerge` prototype
+  pollution, used at **build time only** by `vite-plugin-svelte`. There is no
+  published fix (latest is `4.3.1`), and it is **not** shipped in the `build/`
+  output, so we leave it as-is.
+- The project `.npmrc` keeps `min-release-age=14` (policy — not modified).
+  To stay within it, direct deps are pinned to the newest releases that are
+  at least 14 days old: `@sveltejs/kit@3.1.0`, `adapter-static@4.0.0`,
+  `svelte@5.57.2`, `svelte-check@4.7.7` (newer patches exists but are
+  excluded by the policy). Kit 3.1.0 still resolves the SvelteKit <3.0.0
+  security advisories.
