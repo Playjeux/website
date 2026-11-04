@@ -1,0 +1,28 @@
+# DigitalOcean App Platform spec (https://docs.digitalocean.com/products/app-platform/)
+# Deploy: `doctl apps create --spec .do/app.yaml` (edit `repo` first, or create
+# the app in the dashboard and paste this spec).
+name: playjeux-website
+
+static_sites:
+  - name: website
+    # GitHub source. Change `repo` to your actual owner/repo.
+    github:
+      repo: "Playjeux/website"
+      branch: main
+      deploy_on_push: true
+    # SvelteKit 3 requires Node >= 22.17 (see package.json "engines").
+    environment_slug: node-js
+    build_command: npm run build
+    # adapter-static outputs the static site here (added to .gitignore).
+    output_dir: build
+    # Serve index.html for unknown paths (SPA catch-all). Useful so any deep
+    # link shows the maintenance page instead of a plain 404. Remove to 404.
+    catchall_document: index.html
+    # Enable if your CDN/load-balancer already handles caching/redirects:
+    # routes:
+    #   - path: /
+    #     to_path: /index.html
+    # domains are usually attached to the app/cluster in the dashboard;
+    # uncomment once you know which domain serves this app:
+    # domains:
+    #   - domain: example.com

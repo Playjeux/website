@@ -2,8 +2,9 @@
 
 A barebones, fully-static single-page "under maintenance" site built with
 **SvelteKit 3 + `@sveltejs/adapter-static`** (Svelte 5, Vite 8), deployed as
-**static pages on Cloudflare Pages**. JS source with JSDoc typings (see
-`jsconfig.json`). Build requires **Node ≥ 22.17** (SvelteKit 3 engines).
+a **Static Site on DigitalOcean App Platform**. JS source with JSDoc typings
+(see `jsconfig.json`). Build requires **Node ≥ 22.17** (SvelteKit 3 engines,
+declared in `package.json` `engines`).
 
 ## Scripts
 
@@ -20,30 +21,32 @@ Drop the logo at `static/playjeux-logo.png` (already present). It is served
 from `/playjeux-logo.png` and also used as the favicon. If the image is ever
 missing, the page falls back to a styled text wordmark.
 
-## Deploy to Cloudflare Pages (static)
+## Deploy to DigitalOcean App Platform (static)
 
-The adapter outputs a **pure static site** to `build/` — no server functions,
-so it's served from Cloudflare's static CDN.
+The adapter outputs a **pure static site** to `build/` — no server functions —
+served by App Platform's static hosting behind your existing servers/CDN. A
+spec is provided at `.do/app.yaml`.
 
-### Option A — Git integration (recommended)
-1. Push this repo to GitHub/GitLab.
-2. Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git**.
-3. Select the repo, choose a production branch (`main`), and set:
-   - **Framework preset:** `Svelte`
+### Option A — Dashboard (recommended)
+1. Push this repo to GitHub.
+2. App Platform dashboard → **Create → App → GitHub →** select the repo & branch
+   (`main`).
+3. As the component type choose **Static Site**. Build settings:
    - **Build command:** `npm run build`
-   - **Build output directory:** `build`
-   - **Node.js version:** 22 **or newer** (SvelteKit 3 needs ≥ 22.17)
-4. Save & deploy. Cloudflare runs the build and serves `build/` statically.
+   - **Output directory:** `build`   (this is what gets served)
+   - Node 22+ is used via the `node-js` engine slug (respects `engines.node`).
+4. Attach the domain(s) already configured in your cluster, then **Deploy**.
 
-### Option B — wrangler CLI
+### Option B — `doctl` with the app spec
 ```sh
-npm run build
-npx wrangler pages deploy build --project-name=playjeux-website
+doctl apps create --spec .do/app.yaml
+doctl apps update <APP_ID> --spec .do/app.yaml   # later
 ```
-(follow the prompts; append `--branch=main` / `--commit-dirty=true` as needed)
+Edit `repo` in `.do/app.yaml` first.
 
-Note: since this ships a real prerendered `index.html`, no SPA fallback is
-required — unknown paths correctly return 404 (fine for a maintenance page).
+Notes: `catchall_document: index.html` is enabled in the spec so any path
+serves the maintenance page (SPA catch-all) instead of a 404 — remove it if
+you'd rather 404 unknown paths.
 
 ## Dependencies & audit
 
